@@ -3,6 +3,7 @@ use curl::easy::{Easy, List};
 use structopt::StructOpt;
 use std::fmt;
 use std::str;
+use urlencoding::{encode,decode};
 
 #[derive(StructOpt, Debug)]
 #[structopt(name = "rust-awscurl", about = "Simple CURL with AWS SigV4", author = "Vorapoap Lohwongwtana")]
@@ -115,7 +116,6 @@ fn main() {
     if aws_sigv4.len() > 0 {
         easy.aws_sigv4(aws_sigv4.as_str()).unwrap();
     }
-
     if opt.access_key.is_some() {
         easy.username(opt.access_key.unwrap().as_str()).unwrap();
     }
@@ -130,7 +130,23 @@ fn main() {
     }
 
     let post_data = match opt.post_data {
-        Some(s) => s.clone(),
+        Some(s) => {
+            if aws_sigv4.len() > 0 {
+                let decoded = decode(s.as_str()).unwrap();
+                // Check if post data is already URL Encoded, 
+                if decoded.len() < s.len() {
+                    if opt.verbose > 0 {
+                        eprintln!("* Post data is already URI encoded for AWS SigV4");
+                    }
+                    s.clone()
+                } else {
+                    eprintln!("* Post data must be URI encoded for AWS SigV4");
+                    encode(&s).to_string().clone()
+                }
+            } else {
+                s.clone()
+            }
+        },
         None => { String::new() }
     };
     let http_method: &str;
@@ -145,22 +161,20 @@ fn main() {
             easy.post_field_size(post_data.as_bytes().len() as u64).unwrap();
             http_method = "PUT";
         },
-        "POST" => {
-            
+
+        "POST" => {    
             easy.post(true).unwrap();
             easy.post_field_size(post_data.as_bytes().len() as u64).unwrap();
             http_method = "POST";
-
         },
+
         _ => {
             easy.custom_request(opt.method.as_str()).unwrap();
             easy.post_field_size(post_data.as_bytes().len() as u64).unwrap();
             http_method = opt.method.as_str();
-            
         }
     }
     let mut transfer = easy.transfer();
-
 
     // Prepare POST/PUT/DELETE body data callback if post data exists
     if http_method != "GET" && post_data.len() > 0 {

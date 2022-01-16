@@ -8,3 +8,4 @@ edition = "2021"
 [dependencies]
 curl = "0.4.42"
 structopt = "0.3.25"
+urlencoding = "2.1.0"
