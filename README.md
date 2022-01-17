@@ -15,5 +15,6 @@ You need at least libcurl 7.75.0 for Curl to handle AWS SigV4
 ## How to run
 ```
 cargo build
-./target/debug/rust-awscurl --help
+./target/debug/rust-awscurl --help 
+./target/debug/rust-awscurl -v --access-key "AWS_ACCESS_KEY" --secret-key "AWS_SECRET_KEY" --aws-sigv4 "aws:amz:ap-southeast-1:es" -H "Content-type: application/json" -d '{"size":4}' -XPOST "https://awses-xfdssdfds-fsadf.ap-southeast-1.es.amazonaws.com/esindex
 ```
