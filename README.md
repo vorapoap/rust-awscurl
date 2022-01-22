@@ -22,3 +22,4 @@ cargo build
    --aws-sigv4 "aws:amz:ap-southeast-1:es" -H "Content-type: application/json" -d '{"size":4}' \
    -XPOST "https://awses-xfdssdfds-fsadf.ap-southeast-1.es.amazonaws.com/esindex
 ```
+
